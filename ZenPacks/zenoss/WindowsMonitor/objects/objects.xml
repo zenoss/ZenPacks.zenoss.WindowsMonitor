@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<objects>
+<!-- ('', 'zport', 'dmd', 'Devices', 'Server', 'Windows', 'WMI') -->
+<object id='/zport/dmd/Devices/Server/Windows/WMI' module='Products.ZenModel.DeviceClass' class='DeviceClass'>
+<property visible="True" type="lines" id="devtypes">
+[('Windows Server', 'WMI')]
+</property>
+<property visible="True" type="lines" id="zCollectorPlugins" >
+['zenoss.wmi.WindowsDeviceMap', 'zenoss.wmi.WinServiceMap', 'zenoss.wmi.CpuMap', 'zenoss.wmi.FileSystemMap', 'zenoss.wmi.IpInterfaceMap', 'zenoss.wmi.IpRouteMap', 'zenoss.wmi.MemoryMap', 'zenoss.wmi.ProcessMap', 'zenoss.wmi.SoftwareMap']
+</property>
+</object>
+</objects>
