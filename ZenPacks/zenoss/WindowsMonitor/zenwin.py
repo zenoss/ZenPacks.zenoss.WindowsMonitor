@@ -54,6 +54,8 @@ from utils import addNTLMv2Option, setNTLMv2Auth
 from Products.ZenUtils.Utils import unused
 from Products.ZenCollector.services.config import DeviceProxy
 unused(DeviceProxy)
+from ZenPacks.zenoss.WindowsMonitor.services.WinServiceConfig import WinServiceConfig
+unused(WinServiceConfig)
 
 #
 # creating a logging context for this module to use

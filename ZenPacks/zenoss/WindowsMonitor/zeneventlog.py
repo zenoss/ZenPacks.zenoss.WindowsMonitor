@@ -48,12 +48,15 @@ from Products.ZenUtils.observable import ObservableMixin
 from ZenPacks.zenoss.WindowsMonitor.Watcher import Watcher
 from ZenPacks.zenoss.WindowsMonitor.utils import addNTLMv2Option, setNTLMv2Auth
 
+
 # We retrieve our configuration data remotely via a Twisted PerspectiveBroker
 # connection. To do so, we need to import the class that will be used by the
 # configuration service to send the data over, i.e. DeviceProxy.
 from Products.ZenUtils.Utils import unused
 from Products.ZenCollector.services.config import DeviceProxy
 unused(DeviceProxy)
+from ZenPacks.zenoss.WindowsMonitor.services.EventLogConfig import EventLogConfig
+unused(EventLogConfig)
 
 #
 # creating a logging context for this module to use

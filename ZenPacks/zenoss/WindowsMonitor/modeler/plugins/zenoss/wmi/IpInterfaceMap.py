@@ -13,7 +13,7 @@ import re
 from ZenPacks.zenoss.WindowsMonitor.WMIPlugin import WMIPlugin
 from Products.ZenUtils.Utils import prepId
 from Products.ZenUtils.IpUtil import checkip, IpAddressError
-from ZenPacks.zenoss.WinModelerPlugins.PerfmonInstance import standardizeInstance
+from ZenPacks.zenoss.WindowsMonitor.PerfmonInstance import standardizeInstance
 
 class IpInterfaceMap(WMIPlugin):
     """
