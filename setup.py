@@ -9,7 +9,7 @@ LICENSE = ''
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = []
 INSTALL_REQUIRES = ['ZenPacks.zenoss.PySamba']
-COMPAT_ZENOSS_VERS = '>=4.2.0'
+COMPAT_ZENOSS_VERS = '>=4.1.70'
 PREV_ZENPACK_NAME = 'ZenPacks.Zenoss.WinModelerPlugins'
 
 # STOP_REPLACEMENTS
