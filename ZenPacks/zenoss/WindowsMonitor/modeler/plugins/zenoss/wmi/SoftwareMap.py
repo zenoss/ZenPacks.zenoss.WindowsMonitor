@@ -8,7 +8,7 @@ __doc__ = """SoftwareMap
 Gather the software inventory list.Requires that the WMI Windows Installer Provider is installed.
 """
 
-from ZenPacks.zenoss.PySamba.twisted.callback import WMIFailure
+from pysamba.twisted.callback import WMIFailure
 from ZenPacks.zenoss.WindowsMonitor.WMIPlugin import WMIPlugin
 from Products.ZenUtils.Utils import prepId
 

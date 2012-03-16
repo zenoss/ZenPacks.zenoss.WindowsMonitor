@@ -11,8 +11,8 @@
 #
 ###########################################################################
 
-from ZenPacks.zenoss.PySamba.twisted.reactor import eventContext
-from ZenPacks.zenoss.PySamba.wbem.Query import Query
+from pysamba.twisted.reactor import eventContext
+from pysamba.wbem.Query import Query
 from Products.ZenUtils.Driver import drive
 from twisted.internet import defer
 

@@ -37,7 +37,7 @@ def setNTLMv2Auth(options):
     # only this method should depend on the successful import of the 
     # PySamba zenpack
     try:
-        from ZenPacks.zenoss.PySamba.twisted import reactor
+        from pysamba.twisted import reactor
     except ImportError:
         pass
     else:

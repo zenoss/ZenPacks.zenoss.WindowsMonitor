@@ -25,7 +25,7 @@ import logging
 # any other libraries that might possibly use twisted. This will ensure that
 # the proper WmiReactor is installed before anyone else grabs a reference to
 # the wrong reactor.
-import ZenPacks.zenoss.PySamba.twisted.reactor
+import pysamba.twisted.reactor
 
 import Globals
 import zope.component
