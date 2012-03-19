@@ -4,14 +4,18 @@
 #
 ######################################################################
 
-__doc__="ZenPack Template"
+__doc__="WindowsMonitor ZenPack"
 
 __import__('pkg_resources').declare_namespace(__name__)
 
 import Globals
 import os.path
-
+from Products.CMFCore.DirectoryView import registerDirectory
 from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
+
+skinsDir = os.path.join(os.path.dirname(__file__), 'skins')
+if os.path.isdir(skinsDir):
+    registerDirectory(skinsDir, globals())
 
 _discovery_plugins = ('zenoss.wmi.IpInterfaceMap', 'zenoss.wmi.IpRouteMap')
 
@@ -41,6 +45,13 @@ def _removePluginsFromDiscovered(dmd):
     devcls.setZenProperty('zCollectorPlugins',newstate)
 
 class ZenPack(ZenPackBase):
+
+    packZProperties =  [
+                ('zWinPerfCycleSeconds', 300, 'int'),
+                ('zWinPerfCyclesPerConnection', 5, 'int'),
+                ('zWinPerfTimeoutSeconds', 10, 'int'),
+                ]
+
     def install(self, app):
         ZenPackBase.install(self, app)
         _addPluginsToDiscovered(self.dmd)
@@ -49,3 +60,4 @@ class ZenPack(ZenPackBase):
         if not leaveObjects:
             _removePluginsFromDiscovered(self.dmd)
         ZenPackBase.remove(self, app, leaveObjects)
+
