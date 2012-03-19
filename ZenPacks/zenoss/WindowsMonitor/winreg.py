@@ -842,8 +842,8 @@ def getCounterValue(path, pd, prev):
     except ZeroDivisionError:
         return 0.0
 
-from ZenPacks.zenoss.PySamba.library import *
-from ZenPacks.zenoss.PySamba.rpc.dcerpc import policy_handle
+from pysamba.library import *
+from pysamba.rpc.dcerpc import policy_handle
 
 class winreg_OpenHKPT_in(Structure):
     _fields_ = [

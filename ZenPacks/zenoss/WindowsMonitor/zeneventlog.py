@@ -109,7 +109,7 @@ class ZenEventLogPreferences(object):
         # turn on low-level pysamba debug logging if requested
         logseverity = self.options.logseverity
         if logseverity <= 5:
-            ZenPacks.zenoss.PySamba.library.DEBUGLEVEL.value = 99
+            pysamba.library.DEBUGLEVEL.value = 99
 
         # force NTLMv2 authentication if requested
         setNTLMv2Auth(self.options)

@@ -19,8 +19,8 @@ import os
 # any other libraries that might possibly use twisted. This will ensure that
 # the proper WmiReactor is installed before anyone else grabs a reference to
 # the wrong reactor.
-import ZenPacks.zenoss.PySamba.twisted.reactor
-import ZenPacks.zenoss.PySamba.library
+import pysamba.twisted.reactor
+import pysamba.library
 
 import Globals
 import zope.interface
@@ -75,7 +75,7 @@ class ZenWinPerfPreferences(object):
         # turn on low-level pysamba debug logging if requested
         logseverity = self.options.logseverity
         if logseverity <= 5:
-            ZenPacks.zenoss.PySamba.library.DEBUGLEVEL.value = 99
+            pysamba.library.DEBUGLEVEL.value = 99
 
         # force NTLMv2 authentication if requested
         setNTLMv2Auth(self.options)

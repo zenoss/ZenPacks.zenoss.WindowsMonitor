@@ -4,9 +4,9 @@
 #
 ##########################################################################
 
-from ZenPacks.zenoss.PySamba.rpc.Rpc import Rpc
-from ZenPacks.zenoss.PySamba.talloc import talloc_zero, talloc_array, talloc_free
-from ZenPacks.zenoss.PySamba.composite_context import composite_context
+from pysamba.rpc.Rpc import Rpc
+from pysamba.talloc import talloc_zero, talloc_array, talloc_free
+from pysamba.composite_context import composite_context
 from twisted.internet import defer
 from ctypes import *
 
@@ -17,7 +17,7 @@ import datetime
 import logging
 
 from winreg import *
-from ZenPacks.zenoss.PySamba.library import library, logFuncCall
+from pysamba.library import library, logFuncCall
 
 library.dcerpc_winreg_OpenHKPD_send.restype = c_void_p
 library.dcerpc_winreg_OpenHKPD_send.argtypes = [c_void_p, c_void_p, c_void_p]
