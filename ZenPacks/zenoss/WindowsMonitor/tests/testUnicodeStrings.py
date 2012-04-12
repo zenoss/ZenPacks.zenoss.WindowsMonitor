@@ -13,7 +13,7 @@
 
 import unittest
 from Products.ZenTestCase.BaseTestCase import BaseTestCase
-from ZenPacks.zenoss.WindowsMonitor.winreg import extractUnicodeString
+from ZenPacks.zenoss.WindowsMonitor.winreg_ import extractUnicodeString
 
 class TestUnicodeStrings(BaseTestCase):
 

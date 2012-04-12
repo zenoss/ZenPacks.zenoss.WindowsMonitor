@@ -23,7 +23,7 @@ from Products.ZenUtils.Driver import drive
 import datetime
 import logging
 
-from winreg import *
+from winreg_ import *
 from pysamba.library import library, logFuncCall
 
 library.dcerpc_winreg_OpenHKPD_send.restype = c_void_p

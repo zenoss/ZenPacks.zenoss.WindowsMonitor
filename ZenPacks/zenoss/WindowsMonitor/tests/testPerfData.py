@@ -18,7 +18,7 @@ import sys
 import unittest
 import os
 
-from ZenPacks.zenoss.WindowsMonitor.winreg import PerformanceData, getCounterValue
+from ZenPacks.zenoss.WindowsMonitor.winreg_ import PerformanceData, getCounterValue
 
 log = logging.getLogger("zen.winperf.winreg")
 
