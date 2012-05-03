@@ -44,9 +44,9 @@ from Products.ZenCollector.tasks import SimpleTaskFactory,\
 from Products.ZenEvents.ZenEventClasses import Error, Clear, Status_WinService, Status_Wmi
 from Products.ZenModel.WinServiceClass import STARTMODE_AUTO
 from Products.ZenUtils.observable import ObservableMixin
-import WMIClient
-import Watcher
-from utils import addNTLMv2Option, setNTLMv2Auth
+from ZenPacks.zenoss.WindowsMonitor.WMIClient import WMIClient
+from ZenPacks.zenoss.WindowsMonitor.Watcher import Watcher
+from ZenPacks.zenoss.WindowsMonitor.utils import addNTLMv2Option, setNTLMv2Auth
 
 # We retrieve our configuration data remotely via a Twisted PerspectiveBroker
 # connection. To do so, we need to import the class that will be used by the
