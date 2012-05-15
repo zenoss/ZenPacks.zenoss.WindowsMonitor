@@ -20,6 +20,7 @@ and sent back to ZenHub for further processing.
 """
 
 import logging
+import traceback
 
 # IMPORTANT! The import of the pysamba.twisted.reactor module should come before
 # any other libraries that might possibly use twisted. This will ensure that
@@ -31,8 +32,7 @@ import Globals
 import zope.component
 import zope.interface
 
-from twisted.internet import defer, reactor
-from twisted.python.failure import Failure
+from twisted.internet import defer
 
 from Products.ZenCollector.daemon import CollectorDaemon
 from Products.ZenCollector.interfaces import ICollectorPreferences,\
@@ -42,7 +42,6 @@ from Products.ZenCollector.tasks import SimpleTaskFactory,\
                                         SimpleTaskSplitter,\
                                         TaskStates
 from Products.ZenEvents.ZenEventClasses import Error, Clear, Status_WinService, Status_Wmi
-from Products.ZenModel.WinServiceClass import STARTMODE_AUTO
 from Products.ZenUtils.observable import ObservableMixin
 from ZenPacks.zenoss.WindowsMonitor.WMIClient import WMIClient
 from ZenPacks.zenoss.WindowsMonitor.Watcher import Watcher
@@ -188,48 +187,6 @@ class ZenWinTask(ObservableMixin):
             self._watcher.close()
         self._watcher = None
         
-    def _finished(self, result):
-        """
-        Callback activated when the task is complete so that final statistics
-        on the collection can be displayed.
-        """
-        if not isinstance(result, Failure):
-            log.debug("Device %s [%s] scanned successfully",
-                      self._devId, self._manageIp)
-        else:
-            log.debug("Device %s [%s] scanned failed, %s",
-                      self._devId, self._manageIp, result.getErrorMessage())
-
-        # give the result to the rest of the callback/errchain so that the
-        # ZenCollector framework can keep track of the success/failure rate
-        return result
-
-    def _failure(self, result):
-        """
-        Errback for an unsuccessful asynchronous connection or collection 
-        request.
-        """
-        err = result.getErrorMessage()
-        log.error("Unable to scan device %s: %s", self._devId, err)
-
-        self._reset()
-
-        summary = """
-            Could not read Windows services (%s). Check your
-            username/password settings and verify network connectivity.
-            """ % err
-
-        self._eventService.sendEvent(dict(
-            summary=summary,
-            component='zenwin',
-            eventClass=Status_Wmi,
-            device=self._devId,
-            severity=Error,
-            ))
-
-        # give the result to the rest of the errback chain
-        return result
-        
     def _sendWinServiceEvent(self, name, summary, severity):
         event = {'summary': summary,
                  'eventClass': Status_WinService,
@@ -239,7 +196,20 @@ class ZenWinTask(ObservableMixin):
                  'component': name,
                  'eventGroup': 'StatusTest'}
         self._eventService.sendEvent(event)
-            
+    
+    def _isRunning(self, state):
+        return state.lower() == self.RUNNING
+
+    def _cacheServiceState(self, service):
+        if service.name in self._taskConfig.services:
+            _, stoppedSeverity, _, monitoredStartModes = self._taskConfig.services[service.name]
+
+            running = self._isRunning(service.state)
+            log.debug("Service %s has initial state: %s mode: %s", 
+                        service.name, service.state, service.startMode)
+            self._taskConfig.services[service.name] =\
+                (running, stoppedSeverity, service.startMode, monitoredStartModes)
+
     def _handleResult(self, name, state, startMode):
         """
         Handle a result from the wmi query. Results from both the initial WMI
@@ -254,7 +224,7 @@ class ZenWinTask(ObservableMixin):
             was_running, stoppedSeverity, oldStartMode, monitoredStartModes = \
                 self._taskConfig.services[name]
 
-            running = (state == self.RUNNING)
+            running = self._isRunning(state)
             service_was_important = (oldStartMode in monitoredStartModes)
             service_is_important = (startMode in monitoredStartModes)
 
@@ -266,146 +236,136 @@ class ZenWinTask(ObservableMixin):
                     self._sendWinServiceEvent(name, summary, stoppedSeverity)
                     logLevel = logging.CRITICAL
             else:
-                # if a down service was changed from important to unimportant,
-                # emit a clear event
-                if service_was_important and not running:
-                    self._sendWinServiceEvent(name, summary, Clear)
+                self._sendWinServiceEvent(name, summary, Clear)
 
             self._taskConfig.services[name] = (
                 running, stoppedSeverity, startMode, monitoredStartModes)
 
         log.log(logLevel, '%s on %s', summary, self._devId)
         
-    def _collectSuccessful(self, results):
-        """
-        Callback for a successful fetch of services from the remote device.
-        """
-        self.state = ZenWinTask.STATE_WATCHER_PROCESS
+    def cleanup(self):
+        return self._reset()
+
+    @defer.inlineCallbacks
+    def _connect(self):
+        log.debug("Connecting to %s [%s]", self._devId, self._manageIp)
+        self.state = ZenWinTask.STATE_WMIC_CONNECT
+        self._wmic = WMIClient(self._taskConfig)
+        yield self._wmic.connect()
         
-        log.debug("Successful collection from %s [%s], results=%s",
-                  self._devId, self._manageIp, results)
-                  
-        # make a local copy of monitored services list
-        services = self._taskConfig.services.copy()
-        if results:
-            for result in [r.targetInstance for r in results]:
-                if result.state:
-                    if result.name in services:
-                        # remove service from local copy
-                        del services[result.name]
-                    self._handleResult(
-                        result.name, result.state, result.startmode)
-        # send events for the services that did not show up in results
-        for name, data in services.items():
-            running, failSeverity, startMode, monitoredStartModes = data
-            if running:
-                state = self.RUNNING
-            else:
-                state = self.STOPPED
-            self._handleResult(name, state, startMode)
-        if results:
-            # schedule another immediate collection so that we'll keep eating
-            # events as long as they are ready for us; using callLater ensures
-            # it goes to the end of the immediate work-queue so that other 
-            # events get processing time
-            log.debug("Queuing another fetch for %s [%s]",
-                      self._devId, self._manageIp)
-            d = defer.Deferred()
-            reactor.callLater(0, d.callback, None)
-            d.addCallback(self._collectCallback)
-            return d
-
-    def _deviceUp(self, result):
-        msg = 'WMI connection to %s up.' % self._devId
-        self._eventService.sendEvent(dict(
-            summary=msg,
-            eventClass=Status_Wmi,
-            device=self._devId,
-            severity=Clear,
-            component='zenwin'))
-        return result
-
-    def _collectCallback(self, result):
-        """
-        Callback called after a connect or previous collection so that another
-        collection can take place.
-        """
-        log.debug("Polling for events from %s [%s]", 
-                  self._devId, self._manageIp)
-
-        self.state = ZenWinTask.STATE_WATCHER_QUERY
-        d = self._watcher.getEvents(self._queryTimeout, self._batchSize)
-        d.addCallbacks(self._collectSuccessful, self._failure)
-        d.addCallbacks(self._deviceUp)
-        return d
-
-    def _connectCallback(self, result):
-        """
-        Callback called after a successful connect to the remote Windows device.
-        """
-        log.debug("Connected to %s [%s]", self._devId, self._manageIp)
+        self.state = ZenWinTask.STATE_WMIC_QUERY
+        wql = "SELECT Name, State, StartMode FROM Win32_Service"
+        result = yield self._wmic.query({'query': wql})
         
-    def _connectWatcher(self, result):
         self.state = ZenWinTask.STATE_WMIC_PROCESS
         for service in result['query']:
-            self._handleResult(service.name, service.state, service.startmode)
+            self._cacheServiceState(service)
         self._wmic.close()
         self._wmic = None
+        
         self.state = ZenWinTask.STATE_WATCHER_CONNECT
         wql = "SELECT * FROM __InstanceModificationEvent WITHIN 5 "\
               "WHERE TargetInstance ISA 'Win32_Service'"
         self._watcher = Watcher(self._taskConfig, wql)
-        return self._watcher.connect()
-        
-    def _initialQuery(self, result):
-        self.state = ZenWinTask.STATE_WMIC_QUERY
-        wql = "SELECT Name, State, StartMode FROM Win32_Service"
-        d = self._wmic.query({'query': wql})
-        d.addCallback(self._connectWatcher)
-        return d
-        
-    def _connect(self):
-        """
-        Called when a connection needs to be created to the remote Windows
-        device.
-        """
-        log.debug("Connecting to %s [%s]", self._devId, self._manageIp)
-        self.state = ZenWinTask.STATE_WMIC_CONNECT
-        self._wmic = WMIClient(self._taskConfig)
-        d = self._wmic.connect()
-        d.addCallback(self._initialQuery)
-        return d
+        yield self._watcher.connect()
 
-    def cleanup(self):
-        return self._reset()
-
+        log.debug("Connected to %s [%s]", self._devId, self._manageIp)
+    
+    @defer.inlineCallbacks
     def doTask(self):
         log.debug("Scanning device %s [%s]", self._devId, self._manageIp)
         
-        # see if we need to connect first before doing any collection
-        if not self._watcher:
-            d = self._connect()
-            d.addCallbacks(self._connectCallback, self._failure)
-        else:
-            # since we don't need to bother connecting, we'll just create an 
-            # empty deferred and have it run immediately so the collect callback
-            # will be fired off
-            d = defer.Deferred()
-            reactor.callLater(0, d.callback, None)
-
-        # try collecting events after a successful connect, or if we're already
-        # connected
-        d.addCallback(self._collectCallback)
-
-        # Add the _finished callback to be called in both success and error
-        # scenarios. While we don't need final error processing in this task,
-        # it is good practice to catch any final errors for diagnostic purposes.
-        d.addBoth(self._finished)
-
-        # returning a Deferred will keep the framework from assuming the task
-        # is done until the Deferred actually completes
-        return d
+        try:
+            # see if we need to connect first before doing any collection
+            if not self._watcher:
+                yield self._connect()
     
+            # try collecting events after a successful connect, or if we're already
+            # connected
+            if self._watcher:
+                log.debug("Polling for events from %s [%s]", self._devId, self._manageIp)
+        
+                # make a local copy of monitored services list
+                services = self._taskConfig.services.copy()
+                
+                # read until we get an empty results list returned from our query
+                self.state = ZenWinTask.STATE_WATCHER_QUERY
+                results = []
+                while True:
+                    newresults = yield self._watcher.getEvents(self._queryTimeout, self._batchSize)
+                    if not newresults:
+                        break
+                    results.extend(newresults)
+                    log.debug("Queuing another fetch for %s [%s]", self._devId, self._manageIp)
+
+                if log.isEnabledFor(logging.DEBUG):
+                    showattrs = lambda ob,attrs: tuple(getattr(ob,attr,'') for attr in attrs)
+                    log.debug("Successful collection from %s [%s], results=%s",
+                              self._devId, self._manageIp, 
+                              [showattrs(r.targetInstance, ('name','state','startmode')) for r in results]
+                              )
+
+                self.state = ZenWinTask.STATE_WATCHER_PROCESS
+
+                # collapse repeated results for same service - this maintains our
+                # state model from collection to collection, without weird 
+                # intermediate states caused by multiple service state and 
+                # configuration changes between collections messing things up
+                results_summary = {}
+                for r in results:
+                    result = r.targetInstance
+                    if result.state:
+                        results_summary[result.name] = r
+
+                # now process all results to update service state
+                # and emit CRITICAL/CLEAR events as needed
+                for r in results_summary.itervalues():
+                    result = r.targetInstance
+                    # remove service from local copy
+                    services.pop(result.name, None)
+                    self._handleResult(result.name, result.state, result.startmode)
+
+                # send events for the services that did not show up in results
+                for name, data in services.iteritems():
+                    running, failSeverity, startMode, monitoredStartModes = data
+                    if running:
+                        state = self.RUNNING
+                    else:
+                        state = self.STOPPED
+                    self._handleResult(name, state, startMode)
+
+                msg = 'WMI connection to %s up.' % self._devId
+                self._eventService.sendEvent(dict(
+                    summary=msg,
+                    eventClass=Status_Wmi,
+                    device=self._devId,
+                    severity=Clear,
+                    component='zenwin'))
+
+                log.debug("Device %s [%s] scanned successfully",
+                          self._devId, self._manageIp)
+        except Exception as e:
+            err = str(e)
+            log.debug("Device %s [%s] scanned failed, %s",
+                      self._devId, self._manageIp, err)
+
+            log.error("Unable to scan device %s: %s", self._devId, err)
+
+            self._reset()
+
+            summary = """
+                Could not read Windows services (%s). Check your
+                username/password settings and verify network connectivity.
+                """ % err
+
+            self._eventService.sendEvent(dict(
+                summary=summary,
+                component='zenwin',
+                eventClass=Status_Wmi,
+                device=self._devId,
+                severity=Error,
+                traceback=traceback.format_exc()
+                ))
 
 #
 # Collector Daemon Main entry point
