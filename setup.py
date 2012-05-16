@@ -22,7 +22,7 @@ NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = []
 INSTALL_REQUIRES = ['ZenPacks.zenoss.PySamba']
 COMPAT_ZENOSS_VERS = '>=4.1.70'
-PREV_ZENPACK_NAME = 'ZenPacks.Zenoss.WinModelerPlugins'
+PREV_ZENPACK_NAME = 'ZenPacks.zenoss.WindowsMonitor'
 
 # STOP_REPLACEMENTS
 ################################
