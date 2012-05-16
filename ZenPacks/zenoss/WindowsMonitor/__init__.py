@@ -85,7 +85,7 @@ class ZenPack(ZenPackBase):
         log.info("Removing Packables from previous zenpacks")
         self._movepacks(dmd)
         log.info("Migrating WinPerfDataSources to new class")
-        self._migrateWinPerfDataSrouce(dmd)
+        self._migrateWinPerfDataSource(dmd)
 
     def _movepacks(self, dmd):
         """
@@ -130,7 +130,7 @@ class ZenPack(ZenPackBase):
         ds = parent._getOb(id)
         notify(IndexingEvent(ds))
 
-    def _migrateWinPerfDataSrouce(self, dmd):
+    def _migrateWinPerfDataSource(self, dmd):
         from ZenPacks.zenoss.WindowsMonitor.datasources.WinPerfDataSource import WinPerfDataSource
         oldCls = "ZenPacks.zenoss.ZenWinPerf.datasources.WinPerfDataSource.WinPerfDataSource"
         results = ICatalogTool(dmd).search(oldCls)
