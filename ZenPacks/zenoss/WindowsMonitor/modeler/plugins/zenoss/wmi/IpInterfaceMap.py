@@ -18,15 +18,14 @@ Model Windows IP interfaces using WMI
 import re
 
 from ZenPacks.zenoss.WindowsMonitor.WMIPlugin import WMIPlugin
-from Products.ZenUtils.Utils import prepId
 from Products.ZenUtils.IpUtil import checkip, IpAddressError
 from ZenPacks.zenoss.WindowsMonitor.PerfmonInstance import standardizeInstance
+
 
 class IpInterfaceMap(WMIPlugin):
     """
     Retrieve network interfaces
     """
-    maptype = "IpInterfaceMap" 
     compname = "os"
     relname = "interfaces"
     modname = "Products.ZenModel.IpInterface"
@@ -106,6 +105,11 @@ class IpInterfaceMap(WMIPlugin):
                                 "instance name and will not be monitored for "
                                 "performance data", adapter.description, 
                                 adapter.index)
+
+                # These virtual adapters should not be monitored as they are
+                # like loopback, and are NOT available via perfmon
+                if 'Microsoft Failover Cluster Virtual Adapter' in om.description:
+                    om.monitor = False
 
                 # TODO expensive O(n^2) algorithm to worry about if N gets large
                 for data in raw:
