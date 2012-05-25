@@ -19,6 +19,7 @@ import datetime
 import logging
 import re
 import struct
+from collections import defaultdict
 
 from winreg_constants import *
 
@@ -28,15 +29,23 @@ logging.addLevelName(EXTRA_DEBUG, "ExtraDebug")
 log = logging.getLogger("zen.winperf.winreg")
 
 counterParser = re.compile(
-    r'^\\([^(\\]+)(?:\((?:([^/]+)/)?([^#]+)(?:#(.+))?\))?\\([^\\]+)$'
+        r'^\\(?P<object>[^(\\]+)(\(((?P<parent>[^/]+)/)?(?P<instance>[^#\)]+)(#(?P<index>\d+))?\))?\\(?P<counter>[^\\]+)$'
     )
+
 
 def parseCounter(path):
     """
     Use the counterParser regular expression to break out
     (object, parent, instance, idx, counter) from a counter path string
+
+    Information on potential counter formats can be found here:
+    http://msdn.microsoft.com/en-us/library/windows/desktop/aa373193(v=vs.85).aspx
     """
-    return counterParser.match(path).group(1,2,3,4,5)
+    parts = counterParser.match(path).groupdict()
+    parts = dict((k, v.lower() if v else None) for k,v in parts.items())
+    #if the counter doesn't specify an index, the first instance is used by default
+    parts['index'] = int(parts['index'] or 0)
+    return parts
 
 def extractUnicodeString(data, start, end, encoding):
     """
@@ -157,9 +166,9 @@ class PerformanceData:
 
         cursor = self._parsePerfDataBlock()
 
-        if cursor != len(data) and self.logLevel <= logging.DEBUG:
-            log.debug("Parsed data length differs from data length "
-                      "(%d != %d)" % (cursor,len(data)))
+        if cursor != len(data):
+            log.debug("Parsed data length differs from data length (%d != %d)",
+                cursor, len(data))
 
         del self.data
         del self.dict
@@ -356,13 +365,14 @@ class PerformanceData:
             if self.logLevel <= EXTRA_DEBUG:
                 log.log(EXTRA_DEBUG, "Cursor after PERF_COUNTER_BLOCK = %d", c)
         else:
-            o.instances = {}
+            instances = defaultdict(list)
             for i in range(numInstances):
                 self.curInstance = self.PerfInstanceDefinition()
                 c = self._parsePerfInstanceDefinition(c)
                 if self.logLevel <= EXTRA_DEBUG:
                     log.log(EXTRA_DEBUG, "Cursor after PERF_INSTANCE_DEFINITION = %d", c)
-                o.instances[self.curInstance.name.lower()] = self.curInstance
+                instances[self.curInstance.name.lower()].append(self.curInstance)
+            o.instances = dict(instances)
 
         # verify that our parsing resulted in the same cursor position as
         # the byte length, but this will be off if any padding bytes were
@@ -491,6 +501,7 @@ class PerformanceData:
         size = self._calcsize(fmt)
         start = cursor
         end = start + size
+
         (byteLength, parentObjectTitleIndex, parentObjectInstance,
          uniqueID, nameOffset, nameLength) = self._unpack(fmt, start, end)
          
@@ -692,15 +703,15 @@ class PerformanceData:
         Retrieves the PerfCounterDefinition and PerfCounterValue object for the
         specified counter.
         """
-        counterObj = self.objects[counterParts[0].lower()]
-    
-        counterDef = counterObj.counterDefinitions[counterParts[4].lower()]
-        if counterParts[2] == None:
-            counterValue = counterObj.data[counterParts[4].lower()]
+        counterObj = self.objects[counterParts['object']]
+        counterDef = counterObj.counterDefinitions[counterParts['counter']]
+        if counterParts['instance'] is None:
+            dataObj = counterObj
         else:
-            counterValue = counterObj.instances[counterParts[2].lower()].data[counterParts[4].lower()]
+            dataObj = counterObj.instances[counterParts['instance']][counterParts['index']]
 
-        return (counterDef, counterValue)
+        counterValue = dataObj.data[counterParts['counter']]
+        return counterDef, counterValue
 
 def getCounterValue(path, pd, prev):
     """

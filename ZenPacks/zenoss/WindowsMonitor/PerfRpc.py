@@ -74,8 +74,7 @@ class PerfRpc(Rpc):
         self.hkpt = yield self.call(library.dcerpc_winreg_OpenHKPD_send, params)
     
         # first learn how big the data is
-        if self.logLevel <= logging.DEBUG:
-            self.log.debug("Learning counter object ids")
+        self.log.debug("Learning counter object ids")
         self.type = enum()
         self.size = uint32_t()
         self.out_size = uint32_t()
@@ -94,8 +93,7 @@ class PerfRpc(Rpc):
 
         # allocate space
         sz = p.out.size.contents.value
-        if self.logLevel <= logging.DEBUG:
-            self.log.debug("size is %d", sz)
+        self.log.debug("size is %d", sz)
         p.out.data = p._in.data = talloc_array(params, uint8_t, sz)
         self.size.value = sz
         self.length.value = 0 # we don't need to xmit any raw data
@@ -122,7 +120,7 @@ class PerfRpc(Rpc):
         self.counterRevMap = {}
         for index, name in pairs(data.decode('utf-16').split(u'\x00')):
             if self.logLevel < logging.DEBUG:
-                self.log.log(logging.DEBUG-1, "Found counter: %r=%r", index, name)
+                self.log.debug("Found counter: %r=%r", index, name)
             if index:
                 key = name.decode('latin-1').lower()
                 try:
@@ -137,21 +135,19 @@ class PerfRpc(Rpc):
         objects = set()
         for path in self.counters:
             try:
-                object, _, _, _, _ = parseCounter(path)
-                objects.add(object.lower())
-            except AttributeError:
+                counterObject = parseCounter(path)['object']
+                objects.add(counterObject)
+            except (AttributeError, KeyError):
                 self.log.error("The counter name %s is invalid -- ignoring.", path)
 
         ids = []
         for obj in objects:
             if self.counterMap.has_key(obj):
                 ids.append(self.counterMap[obj])
-                if self.logLevel <= logging.DEBUG:
-                    self.log.debug("Found Perfmon Object: %r=%r", self.counterMap[obj], obj)
+                self.log.debug("Found Perfmon Object: %r=%r", self.counterMap[obj], obj)
         ids.sort()
         query = ' '.join(map(str, ids))
-        if self.logLevel <= logging.DEBUG:
-            self.log.debug("Perfmon Object query: %s", query)
+        self.log.debug("Perfmon Object query: %s", query)
         self.set_name(query)
         self.connected = True
 
@@ -181,8 +177,7 @@ class PerfRpc(Rpc):
             # track of the buffer size, because the value returned by 
             # lpcbData is unpredictable.
             while 1:
-              if self.logLevel <= logging.DEBUG:
-                self.log.debug("Fetching counters")
+              self.log.debug("Fetching counters")
               self.length.value = 0 # we don't need to xmit any raw data
               yield self.call(library.dcerpc_winreg_QueryValue_send,
                               self.params,
@@ -190,8 +185,7 @@ class PerfRpc(Rpc):
 
               if p.out.result.v == 234L: # ERROR_MORE_DATA
                 sz = self.size.value + 65536
-                if self.logLevel <= logging.DEBUG:
-                  self.log.debug("ERROR_MORE_DATA returned, increasing buffer size to %d", sz)
+                self.log.debug("ERROR_MORE_DATA returned, increasing buffer size to %d", sz)
                 talloc_free(p.out.data)
                 p.out.data = p._in.data = talloc_array(self.params, uint8_t, sz)
                 self.size.value = sz
@@ -200,8 +194,7 @@ class PerfRpc(Rpc):
               break
 
             data = string_at(p.out.data, p.out.length.contents.value)
-            if self.logLevel <= logging.DEBUG:
-                self.log.debug("Counter data fetched, length=%d", 
+            self.log.debug("Counter data fetched, length=%d",
                                p.out.length.contents.value)
 
             # save the raw data if requested to do so
