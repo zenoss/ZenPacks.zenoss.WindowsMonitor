@@ -1841,4 +1841,69 @@ AVERAGE
 <object id='Fail' module='Products.ZenEvents.EventClass' class='EventClass'>
 </object>
 </object>
+<!-- OSProcess definitions for Windows daemons -->
+<object id='/zport/dmd/Processes/Zenoss' module='Products.ZenModel.OSProcessOrganizer' class='OSProcessOrganizer'>
+    <tomanycont id='osProcessClasses'>
+        <object id='zeneventlog' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+            <property id='zendoc' type='string'>
+                Gather Windows Event Log messages and convert them to Zenoss events.
+            </property>
+            <property type="string" id="name" mode="w" >
+                zeneventlog
+            </property>
+            <property type="string" id="regex" mode="w" >
+                .*zeneventlog.py.*
+            </property>
+            <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+                False
+            </property>
+            <property type="boolean" id="ignoreParameters" mode="w" >
+                False
+            </property>
+            <property type="text" id="description" mode="w" >
+                Gather Windows Event Log messages and convert them to Zenoss events.
+            </property>
+        </object>
+        <object id='zenwin' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+            <property id='zendoc' type='string'>
+                Gather information about running Windows services.
+            </property>
+            <property type="string" id="name" mode="w" >
+                zenwin
+            </property>
+            <property type="string" id="regex" mode="w" >
+                .*zenwin.py.*
+            </property>
+            <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+                False
+            </property>
+            <property type="boolean" id="ignoreParameters" mode="w" >
+                False
+            </property>
+            <property type="text" id="description" mode="w" >
+                Gather information about running Windows services.
+            </property>
+        </object>
+        <object id='zenwinperf' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+            <property id='zendoc' type='string'>
+                Gather information about Windows performance.
+            </property>
+            <property type="string" id="name" mode="w" >
+                zenwinperf
+            </property>
+            <property type="string" id="regex" mode="w" >
+                .*zenwinperf.py.*
+            </property>
+            <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+                False
+            </property>
+            <property type="boolean" id="ignoreParameters" mode="w" >
+                False
+            </property>
+            <property type="text" id="description" mode="w" >
+                Gather information about Windows performance.
+            </property>
+        </object>
+    </tomanycont>
+</object>
 </objects>
