@@ -63,7 +63,8 @@ class SoftwareMap(WMIPlugin):
                 om.setProductKey = sw.name
                 om.id = self.prepId(om.setProductKey)
                 if not om.id: continue
-                om.setInstallDate = '%s/%s/%s 00:00:00' % \
-                (sw.installdate[0:4], sw.installdate[4:6], sw.installdate[6:8])
+                if hasattr(om, 'setInstallDate') and sw.installdate and len(sw.installdate)==8:
+                    om.setInstallDate = '%s/%s/%s 00:00:00' % \
+                        (sw.installdate[0:4], sw.installdate[4:6], sw.installdate[6:8])
                 rm.append(om)
         return rm
