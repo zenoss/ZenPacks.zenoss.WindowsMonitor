@@ -23,6 +23,10 @@ from Products.CMFCore.DirectoryView import registerDirectory
 from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
 from Products.Zuul.interfaces import ICatalogTool
 from Products.Zuul.catalog.events import IndexingEvent
+from Products.ZenUtils.Utils import unused
+from Products.ZenRelations.zPropertyCategory import setzPropertyCategory
+
+unused(Globals)
 
 log = logging.getLogger("zen.windowsmonitor")
 
@@ -32,6 +36,20 @@ if os.path.isdir(skinsDir):
     registerDirectory(skinsDir, globals())
 
 _discovery_plugins = ('zenoss.wmi.IpInterfaceMap', 'zenoss.wmi.IpRouteMap')
+
+_PACK_Z_PROPS = [('zWinPerfCycleSeconds', 300, 'int'),
+                 ('zWinPerfCyclesPerConnection', 5, 'int'),
+                 ('zWinPerfTimeoutSeconds', 10, 'int'),
+                 ('zWinEventlogClause', '', 'string'),
+                 ('zWmiMonitorIgnore', True, 'boolean'),
+                 ('zWinUser', '', 'string'),
+                 ('zWinPassword', '', 'password'),
+                 ('zWinEventlogMinSeverity', 2, 'int'),
+                 ('zWinEventlog', False, 'boolean'),
+                ]
+
+for name, default_value, type_ in _PACK_Z_PROPS:
+    setzPropertyCategory(name, 'Windows')
 
 def _addPluginsToDiscovered(dmd):
     # Get a reference to the device class
@@ -60,19 +78,27 @@ def _removePluginsFromDiscovered(dmd):
 
 class ZenPack(ZenPackBase):
 
-    packZProperties =  [
-                ('zWinPerfCycleSeconds', 300, 'int'),
-                ('zWinPerfCyclesPerConnection', 5, 'int'),
-                ('zWinPerfTimeoutSeconds', 10, 'int'),
-                ]
+    packZProperties =  _PACK_Z_PROPS
 
     def install(self, app):
         self._removePreviousZenPacks(self.dmd)
         ZenPackBase.install(self, app)
         _addPluginsToDiscovered(self.dmd)
+        if not self.dmd.Devices.Discovered.hasProperty('zWmiMonitorIgnore'):
+            self.dmd.Devices.Discovered.setZenProperty('zWmiMonitorIgnore', False)
+        if not self.dmd.Devices.Server.Windows.hasProperty('zWmiMonitorIgnore'):
+            self.dmd.Devices.Server.Windows.setZenProperty('zWmiMonitorIgnore', False)
+        if not self.dmd.Devices.Server.Windows.hasProperty('zWinEventlog'):
+            self.dmd.Devices.Server.Windows.setZenProperty('zWinEventlog', True)
 
     def remove(self, app, leaveObjects=False):
         if not leaveObjects:
+            if self.dmd.Devices.Server.Windows.hasProperty('zWinEventlog'):
+                self.dmd.Devices.Server.Windows.deleteZenProperty('zWinEventlog')
+            if self.dmd.Devices.Server.Windows.hasProperty('zWmiMonitorIgnore'):
+                self.dmd.Devices.Server.Windows.deleteZenProperty('zWmiMonitorIgnore')
+            if self.dmd.Devices.Discovered.hasProperty('zWmiMonitorIgnore'):
+                self.dmd.Devices.Discovered.deleteZenProperty('zWmiMonitorIgnore')
             _removePluginsFromDiscovered(self.dmd)
         ZenPackBase.remove(self, app, leaveObjects)
 
