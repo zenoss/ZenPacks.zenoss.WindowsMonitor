@@ -1827,14 +1827,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Cmd') -->
-<object id='/zport/dmd/Events/Cmd' module='Products.ZenEvents.EventClass' class='EventClass'>
-<object id='Fail' module='Products.ZenEvents.EventClass' class='EventClass'>
-<object id='WinExe' module='Products.ZenEvents.EventClass' class='EventClass'>
-</object>
-</object>
-<object id='Ok' module='Products.ZenEvents.EventClass' class='EventClass'>
-</object>
+<object id='/zport/dmd/Events/Cmd/Fail/WinExe' module='Products.ZenEvents.EventClass' class='EventClass'>
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Conn') -->
 <object id='/zport/dmd/Events/Conn' module='Products.ZenEvents.EventClass' class='EventClass'>
