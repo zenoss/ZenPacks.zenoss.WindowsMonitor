@@ -708,7 +708,11 @@ class PerformanceData:
         if counterParts['instance'] is None:
             dataObj = counterObj
         else:
-            dataObj = counterObj.instances[counterParts['instance']][counterParts['index']]
+            instanceData = counterObj.instances[counterParts['instance']]
+            if 0 <= counterParts['index'] < len(instanceData):
+                dataObj = instanceData[counterParts['index']]
+            else:
+                return counterDef, None
 
         counterValue = dataObj.data[counterParts['counter']]
         return counterDef, counterValue
@@ -727,6 +731,12 @@ def getCounterValue(path, pd, prev):
     currCounterDef, currCounterValue = pd.getCounter(counterParts)
     if prev:
         prevCounterDef, prevCounterValue = prev.getCounter(counterParts)
+
+    if currCounterValue is None:
+        return None
+
+    if prev and prevCounterValue is None:
+        prev = False
 
     try:
         #
