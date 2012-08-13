@@ -26,11 +26,12 @@ logging.addLevelName(EXTRA_DEBUG, "ExtraDebug")
 log = logging.getLogger("zen.winperf.winreg")
 
 counterParser = re.compile(
-        r'^\\(?P<object>[^(\\]+)(\(((?P<parent>[^/]+)/)?(?P<instance>[^#\)]+)(#(?P<index>\d+))?\))?\\(?P<counter>[^\\]+)$'
+        r'\\(?P<object>[^(\\]+)(\(((?P<parent>[^/]+)/)?(?P<instance>[^#\)]+)(#(?P<index>\d+))?\))?\\(?P<counter>[^\\]+)$'
     )
+range = xrange
 
-
-def parseCounter(path):
+_path_cache = {}
+def parseCounter(path, counterParser_match=counterParser.match):
     """
     Use the counterParser regular expression to break out
     (object, parent, instance, idx, counter) from a counter path string
@@ -38,11 +39,13 @@ def parseCounter(path):
     Information on potential counter formats can be found here:
     http://msdn.microsoft.com/en-us/library/windows/desktop/aa373193(v=vs.85).aspx
     """
-    parts = counterParser.match(path).groupdict()
-    parts = dict((k, v.lower() if v else None) for k,v in parts.items())
-    #if the counter doesn't specify an index, the first instance is used by default
-    parts['index'] = int(parts['index'] or 0)
-    return parts
+    if path not in _path_cache:
+        parts = counterParser_match(path).groupdict()
+        parts = dict((k, v.lower() if v else None) for k,v in parts.iteritems())
+        #if the counter doesn't specify an index, the first instance is used by default
+        parts['index'] = int(parts['index'] or 0)
+        _path_cache[path] = parts
+    return _path_cache[path]
 
 def extractUnicodeString(data, start, end, encoding):
     """
@@ -72,16 +75,15 @@ def extractUnicodeString(data, start, end, encoding):
     # this is a NUL terminated unicode string, so skip that trailing NUL
     return unicode(data[start:pos], encoding)
 
-def isNumerator(counterType):
-    return counterType in (PERF_SAMPLE_FRACTION,
+def isNumerator(counterType, counterTypes=set((PERF_SAMPLE_FRACTION,
                            PERF_RAW_FRACTION,
                            PERF_LARGE_RAW_FRACTION,
                            PERF_PRECISION_SYSTEM_TIMER,
                            PERF_PRECISION_100NS_TIMER,
                            PERF_PRECISION_OBJECT_TIMER,
                            PERF_AVERAGE_TIMER,
-                           PERF_AVERAGE_BULK)
-
+                           PERF_AVERAGE_BULK))):
+    return counterType in counterTypes
 
 #
 # The PerformanceData class parses the provides access to the Windows 
@@ -170,13 +172,15 @@ class PerformanceData:
         del self.data
         del self.dict
 
-    def _unpack(self, fmt, start, end):
+    def _unpack(self, fmt, start, end, struct_unpack=struct.unpack):
         fmt = self._endianPrefix + fmt
-        return struct.unpack(fmt, self.data[start:end])
+        return struct_unpack(fmt, self.data[start:end])
 
-    def _calcsize(self, fmt):
-        fmt = self._endianPrefix + fmt
-        return struct.calcsize(fmt)
+    _fmt_cache={}
+    def _calcsize(self, fmt, struct_calcsize=struct.calcsize):
+        if fmt not in self._fmt_cache:
+            self._fmt_cache[fmt] = struct_calcsize(self._endianPrefix + fmt)
+        return self._fmt_cache[fmt]        
 
     def _parsePerfDataBlock(self, cursor = 0):
         #
@@ -242,7 +246,7 @@ class PerformanceData:
          self.perfTime100nSec, systemNameLength, systemNameOffset) = \
             self._unpack(fmt, start, end)
 
-        self._systemTime = datetime.datetime(stYear,stMonth,stDay,stHour,stMin,
+        self._systemTime = datetime(stYear,stMonth,stDay,stHour,stMin,
                                              stSec, stMs*1000)
 
         start = systemNameOffset
@@ -416,7 +420,7 @@ class PerformanceData:
         counterDef.counterOffset = counterOffset
         counterDef.counterSize = counterSize
 
-        if not self.dict.has_key(counterNameTitleIndex):
+        if counterNameTitleIndex not in self.dict:
             counterDef = None
             counterName = None
             if self.logLevel <= logging.DEBUG:
@@ -428,7 +432,6 @@ class PerformanceData:
 
             if isNumerator(counterType):
                 baseCursor = cursor + byteLength
-                baseCounterDef = self.PerfCounterDefinition()
 
                 fmt = "10L"
                 size = self._calcsize(fmt)
@@ -539,7 +542,7 @@ class PerformanceData:
         # go through all of this object's counter definitions and pick 
         # out the data from the counter block
         #
-        for counterDef in self.curObject.counterDefinitions.values():
+        for counterDef in self.curObject.counterDefinitions.itervalues():
 
             data = self.PerfCounterData()
 
@@ -664,7 +667,7 @@ class PerformanceData:
 
         return cursor + byteLength
 
-    def _pullData(self, data, counterDef, cursor):
+    def _pullData(self, data, counterDef, cursor, fmtdict1={4:"L4xL", 8:"QL"}, fmtdict2={4:"L", 8:"Q"}):
         """
         Pull the performance counter raw data out of the data block based upon
         the provided counter definition. If the counter is a multi-counter, then
@@ -672,17 +675,18 @@ class PerformanceData:
         """
         
         start = cursor + counterDef.counterOffset
+        counterDef_counterSize = counterDef.counterSize
 
         if counterDef.counterType & PERF_MULTI_COUNTER == PERF_MULTI_COUNTER:
-            fmt = {4:"L4xL", 8:"QL"}[cnt.counterSize]
+            fmt = fmtdict1[counterDef_counterSize]
             end = start + self._calcsize(fmt)
             (data.data, data.multiCounterData) = self._unpack(fmt, start, end)
                 
             # TODO: do we need to handle a base value with a multi-counter?
 
         else:
-            fmt = {4:"L", 8:"Q"}[counterDef.counterSize]
-            end = start + counterDef.counterSize
+            fmt = fmtdict2[counterDef_counterSize]
+            end = start + counterDef_counterSize
             data.data, = self._unpack(fmt, start, end)
 
             #
@@ -692,7 +696,7 @@ class PerformanceData:
             if hasattr(counterDef, 'baseOffset'):
                 start = cursor + counterDef.baseOffset
                 end = start + counterDef.baseSize
-                fmt = {4:"L", 8:"Q"}[counterDef.baseSize]
+                fmt = fmtdict2[counterDef.baseSize]
                 data.baseData, = self._unpack(fmt, start, end)
 
     def getCounter(self, counterParts):

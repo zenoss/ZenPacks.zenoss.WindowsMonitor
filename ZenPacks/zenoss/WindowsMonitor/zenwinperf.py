@@ -60,6 +60,10 @@ class ZenWinPerfPreferences(object):
         self.cycleInterval = 5 * 60 # seconds
         self.configCycleInterval = 20 # minutes
         self.configurationService = 'ZenPacks.zenoss.WindowsMonitor.services.WinPerfConfig'
+
+        # set a reasonable default number of allowed concurrent collection tasks
+        self.maxTasks = 50
+
         self.options = None
         self.dispatcher = 'ZenPacks.zenoss.EnterpriseCollector.DispatchingStrategy.DeviceAffineDispatching'
 

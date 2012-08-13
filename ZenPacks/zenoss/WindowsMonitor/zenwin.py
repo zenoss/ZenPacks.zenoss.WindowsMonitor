@@ -71,6 +71,10 @@ class ZenWinPreferences(object):
         self.defaultRRDCreateCommand = None
         self.cycleInterval = 5 * 60 # seconds
         self.configCycleInterval = 20 # minutes
+
+        # set a reasonable default number of allowed concurrent collection tasks
+        self.maxTasks = 50
+
         self.options = None
         
         # the configurationService attribute is the fully qualified class-name
