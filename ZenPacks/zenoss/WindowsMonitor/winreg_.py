@@ -12,7 +12,7 @@ __doc__="""
 Structures for calling winreg RPC methods, and a class for decoding
 the QueryValues result
 """
-import datetime
+from datetime import datetime
 import logging
 import re
 import struct
