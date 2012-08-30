@@ -859,13 +859,18 @@ def getCounterValue(path, pd, prev):
             return None
 
         # System Up Time is being corrected here because it is returned
-        # in seconds, but we expect it in milliseconds
+        # in seconds, but we expect it in centiseconds
         valueAsFloat = float(value)
-        if counterParts == ('System', None, None, None, 'System Up Time'):
-            logging.getLogger("zen.winperf.winreg").debug(
-                 'For \\System\\System Up Time counter, multiplying %f * 100' 
-                 % valueAsFloat )
+        if counterParts == {'object': 'system',
+                            'counter': 'system up time', 
+                            'instance': None, 
+                            'index': 0, 
+                            'parent': None, 
+                            }:
+            log.debug('For \\System\\System Up Time counter, multiplying %f * 100', 
+                 valueAsFloat )            
             valueAsFloat *= 100
+
         return valueAsFloat
 
     except ZeroDivisionError:
