@@ -52,9 +52,10 @@ class WinPerfConfig(CollectorConfigService):
     def _createDeviceProxy(self, device):
         proxy = CollectorConfigService._createDeviceProxy(self, device)
 
-        proxy.configCycleInterval = max(device.zWinPerfCycleSeconds, 1)
-        proxy.cyclesPerConnection = max(device.zWinPerfCyclesPerConnection, 2)
-        proxy.timeoutSeconds = max(device.zWinPerfTimeoutSeconds, 1)
+        proxy.configCycleInterval = max(device.getProperty('zWinPerfCycleSeconds', 1), 1)
+        proxy.cyclesPerConnection = max(device.getProperty('zWinPerfCyclesPerConnection', 2), 2)
+        proxy.timeoutSeconds = max(device.getProperty('zWinPerfTimeoutSeconds', 1), 1)
+
 
         proxy.dpInfo = []
         proxy.thresholds = []

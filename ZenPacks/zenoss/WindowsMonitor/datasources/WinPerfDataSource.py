@@ -192,7 +192,7 @@ class WinPerfDataSource(ZenPackPersistence, SimpleRRDDataSource):
         child = popen2.Popen4(cmd)
         flags = fcntl.fcntl(child.fromchild, fcntl.F_GETFL)
         fcntl.fcntl(child.fromchild, fcntl.F_SETFL, flags | os.O_NDELAY)
-        timeout = max(device.zWinPerfTimeoutSeconds, 1)
+        timeout = max(device.getProperty('zWinPerfTimeoutSeconds', 1), 1)
         endtime = time.time() + timeout
         pollPeriod = 1
         firstPass = True
