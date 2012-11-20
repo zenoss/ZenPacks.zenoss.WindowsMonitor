@@ -27,6 +27,7 @@ class WindowsDeviceMap(WMIPlugin):
         return  {
             "Win32_OperatingSystem":"select * from Win32_OperatingSystem",
             "Win32_SystemEnclosure":"select * from Win32_SystemEnclosure",
+            "Win32_ComputerSystem":"select * from Win32_ComputerSystem",
         }
     
     def process(self, device, results, log):
@@ -47,14 +48,15 @@ class WindowsDeviceMap(WMIPlugin):
         for e in results["Win32_SystemEnclosure"]:
             om.setHWTag = e.smbiosassettag.rstrip()
             om.setHWSerialNumber = e.serialnumber.rstrip()
-            model = e.model
-            if not model: model = "Unknown"
-            manufacturer = e.manufacturer
-            if not manufacturer:
-                manufacturer = "Unknown"
-            elif re.search(r'Dell', manufacturer):
+            break
+        
+        for f in results["Win32_ComputerSystem"]:
+            model = f.model or "Unknown"
+                
+            manufacturer = f.manufacturer or "Unknown"
+            if "Dell" in manufacturer:
                 manufacturer = "Dell"
+            
             om.setHWProductKey = MultiArgs(model, manufacturer)
-            break 
-
+            break
         return om
