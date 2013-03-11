@@ -81,23 +81,9 @@ class ZenPack(ZenPackBase):
         self._removePreviousZenPacks(self.dmd)
         ZenPackBase.install(self, app)
         _addPluginsToDiscovered(self.dmd)
-        self.createZProperties(self.dmd.getPhysicalRoot())
-        if not self.dmd.Devices.Discovered.hasProperty('zWmiMonitorIgnore'):
-            self.dmd.Devices.Discovered.setZenProperty('zWmiMonitorIgnore', False)
-        if not self.dmd.Devices.Server.Windows.hasProperty('zWmiMonitorIgnore'):
-            self.dmd.Devices.Server.Windows.setZenProperty('zWmiMonitorIgnore', False)
-        if not self.dmd.Devices.Server.Windows.hasProperty('zWinEventlog'):
-            self.dmd.Devices.Server.Windows.setZenProperty('zWinEventlog', True)
 
     def remove(self, app, leaveObjects=False):
         if not leaveObjects:
-            self.removeZProperties(self.dmd.getPhysicalRoot())
-            if self.dmd.Devices.Server.Windows.hasProperty('zWinEventlog'):
-                self.dmd.Devices.Server.Windows.deleteZenProperty('zWinEventlog')
-            if self.dmd.Devices.Server.Windows.hasProperty('zWmiMonitorIgnore'):
-                self.dmd.Devices.Server.Windows.deleteZenProperty('zWmiMonitorIgnore')
-            if self.dmd.Devices.Discovered.hasProperty('zWmiMonitorIgnore'):
-                self.dmd.Devices.Discovered.deleteZenProperty('zWmiMonitorIgnore')
             _removePluginsFromDiscovered(self.dmd)
         ZenPackBase.remove(self, app, leaveObjects)
 
