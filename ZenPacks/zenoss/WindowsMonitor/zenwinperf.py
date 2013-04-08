@@ -125,6 +125,7 @@ class ZenWinPerfCollector(object):
         cmdOptions = self._taskConfig.options
         self._captureFile = cmdOptions.get('capturefile', None)
         self._testCounter = cmdOptions.get('testcounter', None)
+        self._ntlmv2auth = cmdOptions.get('ntlmv2auth', False)
 
         self._perfRpc = None
         self._reset()
@@ -164,7 +165,7 @@ class ZenWinPerfCollector(object):
                 else:
                     counters = [dp['counter'] for dp in self._taskConfig.dpInfo]
         
-                self._perfRpc = PerfRpc(counters, self._captureFile)
+                self._perfRpc = PerfRpc(counters, self._captureFile, self._ntlmv2auth)
                 self._perfRpc.ownerDevice = self
                 yield self._perfRpc.connect(self._manageIp, self._getCredentials())                
                 log.debug("Connected to %s [%s]", self._devId, self._manageIp)

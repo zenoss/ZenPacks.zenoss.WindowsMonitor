@@ -40,8 +40,8 @@ def pointerTo(obj):
 class FetchBeforeConnectedError(Exception): pass
 
 class PerfRpc(Rpc):
-    def __init__(self, counters, capturePath=None):
-        Rpc.__init__(self)
+    def __init__(self, counters, capturePath=None, ntlmv2auth=False):
+        Rpc.__init__(self, ntlmv2auth)
         self.log = logging.getLogger("zen.winperf.PerfRpc")
         self.logLevel = log.getEffectiveLevel()
         self.counters = counters
