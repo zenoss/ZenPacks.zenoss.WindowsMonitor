@@ -241,6 +241,10 @@ class ZenWinTask(ObservableMixin):
             self._taskConfig.services[name] = (
                 running, stoppedSeverity, startMode, monitoredStartModes)
 
+        logState = state
+        if startMode == '' or startMode is None:
+            logState = "unknown"
+        summary = "Windows service '%s' is %s" % (name, logState)
         log.log(logLevel, '%s on %s', summary, self._devId)
         
     def cleanup(self):
