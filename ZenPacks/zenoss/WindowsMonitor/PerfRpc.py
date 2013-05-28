@@ -203,14 +203,16 @@ class PerfRpc(Rpc):
 
             perf = PerformanceData(data, self.counterRevMap)
             result = {}
+            summaryMsg = ""
             for path in self.counters:
                 try:
                     result[path] = getCounterValue(path, perf, self.prev)
                 except (AttributeError, KeyError):
-                    summaryMsg = "Bad counter for device %s: %s" % (self.host, path)
-                    self.log.warning(summaryMsg)
-                    if self.ownerDevice is not None:
-                        self.ownerDevice.sendEvent(
+                    if not summaryMsg:
+                        summaryMsg = "Bad counter for device %s: %s" % (self.host, path)
+                        self.log.warning(summaryMsg)
+                        if self.ownerDevice is not None:
+                            self.ownerDevice.sendEvent(
                                              self.ownerDevice.WARNING_EVENT,
                                              component = "zen.winperf.PerfRpc",
                                              device = self.ownerDevice._devId,
