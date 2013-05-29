@@ -203,20 +203,36 @@ class PerfRpc(Rpc):
 
             perf = PerformanceData(data, self.counterRevMap)
             result = {}
-            summaryMsg = ""
+            badCounterPaths = []
             for path in self.counters:
                 try:
                     result[path] = getCounterValue(path, perf, self.prev)
                 except (AttributeError, KeyError):
-                    if not summaryMsg:
-                        summaryMsg = "Bad counter for device %s: %s" % (self.host, path)
-                        self.log.warning(summaryMsg)
-                        if self.ownerDevice is not None:
-                            self.ownerDevice.sendEvent(
-                                             self.ownerDevice.WARNING_EVENT,
-                                             component = "zen.winperf.PerfRpc",
-                                             device = self.ownerDevice._devId,
-                                             summary = summaryMsg)
+                    badCounterPaths.append(path)
+
+            if badCounterPaths:
+                summaryMsg = "Bad Counter(s) - %d bad counter(s) for device %s" % (len(badCounterPaths), self.host)
+                self.log.warning(summaryMsg + " " + ", ".join(badCounterPaths))
+                if self.ownerDevice is not None:
+                    self.ownerDevice._eventService.sendEvent(
+                        self.ownerDevice.WARNING_EVENT,
+                        component = "zen.winperf.PerfRpc",
+                        device = self.ownerDevice._devId,
+                        eventKey = "bad_wmi_counter_consolidation_event",
+                        summary = summaryMsg,
+                        explanation = "These WMI performance counter(s) are being queried, but the specific performance counter(s) are not on the remote system",
+                        resolution = "Stop monitoring the component or fix and/or remove the performance counter name from the monitoring template. 'typeperf -Q' on the remote system will show available counters",
+                        details = ", ".join(badCounterPaths))
+            else:
+                summaryMsg = "No bad counters detected for device %s" % (self.host)
+                self.log.info(summaryMsg)
+                if self.ownerDevice is not None:
+                    self.ownerDevice._eventService.sendEvent(
+                        self.ownerDevice.CLEAR_EVENT,
+                        component = "zen.winperf.PerfRpc",
+                        device = self.ownerDevice._devId,
+                        eventKey = "bad_wmi_counter_consolidation_event",
+                        summary = summaryMsg)
 
             self.prev = perf
             talloc_free(ctx)
