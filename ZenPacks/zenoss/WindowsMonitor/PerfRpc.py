@@ -225,7 +225,7 @@ class PerfRpc(Rpc):
                         details = ", ".join(badCounterPaths))
             else:
                 summaryMsg = "No bad counters detected for device %s" % (self.host)
-                self.log.info(summaryMsg)
+                self.log.debug(summaryMsg)
                 if self.ownerDevice is not None:
                     self.ownerDevice.sendEvent(
                         self.ownerDevice.CLEAR_EVENT,
