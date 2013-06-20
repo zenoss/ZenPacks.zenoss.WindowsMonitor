@@ -217,6 +217,8 @@ class ZenWinTask(ObservableMixin):
         this method. Log running and stopped transitions. Send an event if the
         service is monitored.
         """
+        if state is None:
+            state = "unknown"
         state = state.lower()
         summary = "Windows service '%s' is %s" % (name, state)
         logLevel = logging.DEBUG
