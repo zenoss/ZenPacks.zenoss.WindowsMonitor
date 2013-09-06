@@ -56,7 +56,6 @@ class ZenWinPerfPreferences(object):
         values for needed attributes.
         """
         self.collectorName = "zenwinperf"
-        self.defaultRRDCreateCommand = None
         self.cycleInterval = 5 * 60 # seconds
         self.configCycleInterval = 20 # minutes
         self.configurationService = 'ZenPacks.zenoss.WindowsMonitor.services.WinPerfConfig'
