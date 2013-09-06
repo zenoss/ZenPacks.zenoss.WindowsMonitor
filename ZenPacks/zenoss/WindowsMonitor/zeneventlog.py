@@ -71,7 +71,6 @@ class ZenEventLogPreferences(object):
         values for needed attributes.
         """
         self.collectorName = "zeneventlog"
-        self.defaultRRDCreateCommand = None
         self.cycleInterval = 5 * 60 # seconds
         self.configCycleInterval = 20 # minutes
 
