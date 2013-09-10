@@ -68,6 +68,7 @@ class ZenWinPreferences(object):
         values for needed attributes.
         """
         self.collectorName = "zenwin"
+        self.defaultRRDCreateCommand = None
         self.cycleInterval = 5 * 60 # seconds
         self.configCycleInterval = 20 # minutes
 
