@@ -1,6 +1,6 @@
 ##############################################################################
 # 
-# Copyright (C) Zenoss, Inc. 2007, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2007-2013, all rights reserved.
 # 
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -30,8 +30,15 @@ class WMIPlugin(CollectorPlugin):
 
     def copyDataToProxy(self, device, proxy):
         for prop in self.deviceProperties:
-            if hasattr(device, prop):
-                setattr(proxy, prop, getattr(device, prop))
+            if device.hasProperty(prop, useAcquisition=True):
+                value = device.getProperty(prop)
+            elif hasattr(device, prop):
+                value = getattr(device, prop)
+                if callable(value):
+                    value = value()
+            else:
+                continue
+            setattr(proxy, prop, value)
         # Do any other prep of plugin here
         setattr(proxy, 'lastChange', getattr(device, '_lastChange', ''))
 
