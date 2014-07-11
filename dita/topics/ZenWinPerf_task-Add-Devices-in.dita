@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:task" "task.dtd">
+<task id="d71e361">
+  <title>Add Devices in <ph conkeyref="names/platform"/></title>
+  <taskbody>
+  <context><p>The WindowsMonitor ZenPack includes a
+      <keyword outputclass="classname">/Device/Server/Windows/WMI</keyword> class that has several
+      device templates bound. SNMP data collection is not used in this
+      class.</p><p>To move a device to the
+      <keyword outputclass="classname">/Device/Server/Windows/WMI</keyword> class:</p>
+  </context>
+  <steps-informal>
+    <ol>
+        <li>Select the device row in the devices list.</li>
+        <li>Drag the device to the class in the devices hierarchy.</li>
+      </ol>
+  </steps-informal>
+</taskbody>
+</task>

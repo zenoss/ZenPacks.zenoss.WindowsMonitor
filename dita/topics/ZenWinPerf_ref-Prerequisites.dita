@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:reference" "reference.dtd">
+<reference id="d71e100"><title>Prerequisites</title><refbody><section><p>Supported OS versions are:</p><ul>
+      <li>
+        <p>Windows XP</p>
+      </li>
+
+      <li>
+        <p>Windows 2000</p>
+      </li>
+
+      <li>
+        <p>Windows 2003</p>
+      </li>
+
+      <li>
+        <p>Windows Vista</p>
+      </li>
+
+      <li>
+        <p>Windows 2008</p>
+      </li>
+    </ul><table>
+      <title>Windows Performance Monitoring Prerequisites</title>
+      <tgroup cols="2">
+        <thead>
+          <row>
+            <entry>Prerequisite</entry>
+            <entry>Restriction</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><p>Product</p></entry>
+            <entry><ph conkeyref="names/platform"/> 4.x</entry>
+          </row>
+
+          <row>
+            <entry><p>Required ZenPacks</p></entry>
+            <entry><p>ZenPacks.zenoss.WindowsMonitor,</p><p>ZenPacks.zenoss.EnterpriseCollector</p></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table></section></refbody></reference>

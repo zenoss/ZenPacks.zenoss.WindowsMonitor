@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:map" "map.dtd">
+<map>
+   <title>WindowsMonitor</title>
+   <topicref href="topics/WindowsMonitor.dita">
+      <topicref href="topics/ZenWinPerf_ref-Prerequisites.dita"/>
+      <topicref href="topics/ZenWinPerf_task-Defining-Windows-Credentials.dita"/>
+      <topicref href="topics/ZenWinPerf_task-Add-Devices-in.dita"/>
+      <topicref href="topics/ZenWinPerf_task-Monitor-Other-Performance-Counters.dita"/>
+      <topicref href="topics/ZenWinPerf_task-Testing-Connections-from-Windows.dita"/>
+      <topicref href="topics/ZenWinPerf_task-Testing-Connections-from.dita"/>
+      <topicref href="topics/ZenWinPerf_task-Modify-Registry-Settings-for-Firewalls-in-Secure-Environments.dita"/>
+      <topicref href="topics/ZenWinPerf_task-Configuring-a-Standalone-Windows-Device-for-a-Non-Administrative-Account.dita">
+       <topicref href="topics/ZenWinPerf_ref-Tuning-Collector-Daemon-Performance.dita"/>
+       <topicref href="topics/ZenWinPerf_ref-Multiple-Workers.dita"/>
+	  </topicref>
+      <topicref href="topics/ZenWinPerf_task-Enabling-the-NTLMv2-Authentication-Protocol.dita"/>
+   </topicref>
+</map>

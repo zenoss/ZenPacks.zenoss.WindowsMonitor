@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:task" "task.dtd">
+<task id="d71e396"><title>Monitor Other Performance Counters</title><taskbody><context><p>To create your own <codeph outputclass="literal">WinPerf</codeph> data sources, follow
+    these steps:</p></context><steps-informal><ol>
+      <li>
+        <p>Navigate to a new or existing monitoring template, and select
+        <menucascade><uicontrol outputclass="guimenuitem">New DataSource</uicontrol></menucascade> from the <menucascade><uicontrol outputclass="guimenu">Data
+        Sources</uicontrol></menucascade> table menu.</p>
+      </li>
+
+      <li>
+        <p>Enter a name for the data source, select
+        <uicontrol outputclass="guilabel">WinPerf</uicontrol> as the type and then click
+        <uicontrol outputclass="guibutton">OK</uicontrol>.</p>
+      </li>
+
+      <li>
+        <p>Enter a Windows performance counter in the <uicontrol outputclass="guilabel">Perf
+        Counter</uicontrol> field. See <xref href="http://technet.microsoft.com/en-us/library/bb726968.aspx" scope="external" format="html">Windows
+        Perfmon counters</xref> for more details.</p>
+      </li>
+
+      <li>
+        <p>Click <b>Save</b>. Notice that a data
+        point is created with the same name as the performance counter you
+        selected.</p>
+      </li>
+
+      <li>
+        <p>Optionally, test the counter by entering a device ID in the
+        <uicontrol outputclass="guilabel">Test Device</uicontrol> field and clicking the Test
+        button.</p>
+      </li>
+    </ol></steps-informal></taskbody></task>

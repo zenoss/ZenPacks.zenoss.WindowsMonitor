@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:task" "task.dtd">
+<task id="d71e572"><title>Modify Registry Settings for Firewalls in Secure
+    Environments</title><taskbody><context><note>
+      <p>This procedure is applicable only for environments with
+      firewalls.</p>
+    </note><p>The Distributed Component Object Model (DCOM) dynamically allocates
+    one port to each process. You need to decide how many ports you want to
+    allocate to DCOM processes, which is equivalent to the number of
+    simultaneous DCOM processes through the firewall. You must open all of the
+    UDP and TCP ports corresponding to the port numbers you choose. You also
+    need to open TCP/UDP 135, which is used for <uicontrol outputclass="guilabel">RPC End Point
+    Mapping</uicontrol>, among other things. In addition, you must edit the
+    registry to tell DCOM which ports you reserved. You do this with the
+    <filepath>HKEY_LOCAL_MACHINES\Software\Microsoft\Rpc\Internet</filepath>
+    registry key, which you will probably have to create.</p><p>To allow remote registry access for the performance data to be read,
+    see <xref href="http://support.microsoft.com/default.aspx?scid=kb;en-us;164018" scope="external" format="html">Controlling
+    remote Performance Monitor access to Windows NT servers.</xref></p><p>The following table shows the registry settings to restrict DCOMs
+    port range to 10 ports.</p>
+      
+      <table>
+      <title>Firewall and Registry Settings for DCOM</title>
+
+      <tgroup cols="3">
+        <thead>
+          <row>
+            <entry>Registry Key</entry>
+            <entry>Type</entry>
+            <entry>Setting</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><p>Ports</p></entry>
+            <entry><p><codeph outputclass="literal">REG_MULTI_SZ</codeph></p></entry>
+            <entry><p>Range of port. Can be multiple lines such as:
+            3001-3010 135</p></entry>
+          </row>
+
+          <row>
+            <entry><p>PortsInternetAvailable</p></entry>
+            <entry><p><codeph outputclass="literal">REG_SZ</codeph></p></entry>
+            <entry><p><codeph outputclass="literal">Y</codeph></p></entry>
+          </row>
+
+          <row>
+            <entry><p>UseInternetPorts</p></entry>
+            <entry><p><codeph outputclass="literal">REG_SZ</codeph></p></entry>
+            <entry><p><codeph outputclass="literal">Y</codeph></p></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table><p>These registry settings must be established in addition to all
+    firewall settings.</p></context></taskbody></task>
