@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 ##############################################################################
-# 
-# Copyright (C) Zenoss, Inc. 2006-2009, all rights reserved.
-# 
+#
+# Copyright (C) Zenoss, Inc. 2006-2014, all rights reserved.
+#
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
-# 
+#
 ##############################################################################
 
 
@@ -57,6 +57,7 @@ unused(WinServiceConfig)
 #
 log = logging.getLogger("zen.zenwin")
 
+
 # Create an implementation of the ICollectorPreferences interface so that the
 # ZenCollector framework can configure itself from our preferences.
 class ZenWinPreferences(object):
@@ -83,7 +84,7 @@ class ZenWinPreferences(object):
         
         self.wmibatchSize = 10
         self.wmiqueryTimeout = 1000
-        
+
     def buildOptions(self, parser):
         parser.add_option('--debug', dest='debug', default=False,
                                action='store_true',
@@ -94,12 +95,12 @@ class ZenWinPreferences(object):
                                )
         parser.add_option('--queryTimeout', dest='queryTimeout',
                                default=None, type='int',
-                               help='The number of milliseconds to wait for ' + \
-                                    'WMI query to respond. Overrides the ' + \
+                               help='The number of milliseconds to wait for '
+                                    'WMI query to respond. Overrides the '
                                     'server settings.')
         parser.add_option('--batchSize', dest='batchSize',
                                default=None, type='int',
-                               help='Number of data objects to retrieve in a ' +
+                               help='Number of data objects to retrieve in a '
                                     'single WMI query.')
         parser.add_option('--statusRefresh', dest='statusRefresh',
                                default=15, type='int',
