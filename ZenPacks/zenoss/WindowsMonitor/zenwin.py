@@ -101,6 +101,12 @@ class ZenWinPreferences(object):
                                default=None, type='int',
                                help='Number of data objects to retrieve in a ' +
                                     'single WMI query.')
+        parser.add_option('--statusRefresh', dest='statusRefresh',
+                               default=15, type='int',
+                               help='An interval in minutes at which the '
+                                    'status of every monitored service on '
+                                    'the device will be refreshed. '
+                                    'Defaults to 15 minutes.')
         addNTLMv2Option(parser)
 
     def postStartup(self):
@@ -170,7 +176,13 @@ class ZenWinTask(ObservableMixin):
         self._queryTimeout = self._preferences.options.queryTimeout
         if not self._queryTimeout:
             self._queryTimeout = self._preferences.wmiqueryTimeout
-            
+
+        # Calculate the number of cycles, after which the state of every
+        # service should be reinitialised, to make sure the service state
+        # is up to date even if some notification messages were missed.
+        self._refreshCycles = self._preferences.options.statusRefresh * 60 / self.interval
+        self._currentCycles = 0
+
         self._wmic = None # the WMIClient
         self._watcher = None
         self._reset()
@@ -282,6 +294,12 @@ class ZenWinTask(ObservableMixin):
         log.debug("Scanning device %s [%s]", self._devId, self._manageIp)
         
         try:
+            # Refresh the initial state of services.
+            if self._currentCycles >= self._refreshCycles:
+                log.debug("Refreshing the initial states of services")
+                self._reset()
+                self._currentCycles = 0
+
             # see if we need to connect first before doing any collection
             if not self._watcher:
                 yield self._connect()
@@ -347,6 +365,9 @@ class ZenWinTask(ObservableMixin):
                     device=self._devId,
                     severity=Clear,
                     component='zenwin'))
+
+                # Increment the number of cycles passed.
+                self._currentCycles += 1
 
                 log.debug("Device %s [%s] scanned successfully",
                           self._devId, self._manageIp)
