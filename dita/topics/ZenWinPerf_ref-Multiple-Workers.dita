@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:reference" "reference.dtd">
+<reference id="d71e1233"><title>Multiple Workers</title><refbody><section><p>ZenWinPerf supports multiple workers. This feature allows you to
+    support data collection from more Windows devices without defining
+    additional collectors to host additional ZenWinPerf daemons. The multiple
+    workers feature is enabled by a configuration option:</p><p><b>--workers</b> - Runs ZenWinPerf in a
+    multi-worker setup. By default, set to a value of 2.</p></section></refbody></reference>

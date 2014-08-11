@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:task" "task.dtd">
+<task id="d71e465"><title>Testing Connections from Windows</title><taskbody><context><p>This procedure verifies that the username/password combination is
+    correct, and that there is no firewall blocking the connection.</p></context><steps-informal><ol>
+      <li>
+        <p>Run the <cmdname>wbemtest</cmdname> command.</p>
+      </li>
+
+      <li>
+        <p>Click the <uicontrol outputclass="guibutton">Connect…</uicontrol> button.</p>
+      </li>
+
+      <li>
+        <p>In the <uicontrol outputclass="guilabel">Namespace</uicontrol> field, enter:</p>
+
+        <codeblock outputclass="screen">\\HOST\root\cimv2</codeblock>
+      </li>
+
+      <li>
+        <p>Enter login information in the <uicontrol outputclass="guilabel">User</uicontrol> and
+        <uicontrol outputclass="guilabel">Password</uicontrol> fields.</p>
+      </li>
+
+      <li>
+        <p>Click the <uicontrol outputclass="guibutton">Query</uicontrol> field.</p>
+      </li>
+
+      <li>
+        <p>Enter the following query to return a dialog with a list of
+        services on the device.</p>
+
+        <codeblock outputclass="screen">select * from win32_service</codeblock>
+      </li>
+    </ol></steps-informal></taskbody></task>

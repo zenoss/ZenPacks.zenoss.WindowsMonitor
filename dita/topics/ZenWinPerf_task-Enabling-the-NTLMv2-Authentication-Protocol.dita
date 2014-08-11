@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:task" "task.dtd">
+<task id="d71e1247"><title>Enabling the NTLMv2 Authentication Protocol</title><taskbody><context><p>To enable the NTLMv2 authentication protocol for all Windows devices
+    of a zenwin, zenwinperf, or zenevent log collector, update collector
+    configuration files:</p><p>Alternatively, from the command line add:</p><codeblock outputclass="programlisting">--ntlmv2auth</codeblock><p><codeblock outputclass="programlisting"># Enable NTLMv2 authentication for Windows
+# Devices, default: False
+#ntlmv2auth False</codeblock></p></context></taskbody></task>

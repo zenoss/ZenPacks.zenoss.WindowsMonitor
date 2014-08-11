@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:task" "task.dtd">
+<task id="d71e538"><title>Testing Connections from <ph conkeyref="names/platform"/></title><taskbody><context><p>This procedure verifies that the username/password combination is
+    correct, and that there is no firewall blocking the connection. Since this
+    is done from the <ph conkeyref="names/platform"/> server, this test is a better approximation of
+    how successful <ph conkeyref="names/platform"/> will be in connecting to the Windows
+    device.</p><p>As the zenoss user on the <ph conkeyref="names/platform"/> server:</p><codeblock outputclass="screen">wmic -U '<varname outputclass="replaceable">user</varname>' //<varname outputclass="replaceable">device</varname> 'select * from Win32_computerSystem'</codeblock><p>The <cmdname>wmic</cmdname> command will then prompt you for the
+    password.</p></context></taskbody></task>

@@ -1,6 +1,6 @@
 ##############################################################################
 # 
-# Copyright (C) Zenoss, Inc. 2012, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2012-2013, all rights reserved.
 # 
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -13,13 +13,13 @@
 # or saved.  Do not modify them directly here.
 # NB: PACKAGES is deprecated
 NAME = 'ZenPacks.zenoss.WindowsMonitor'
-VERSION = '1.0.10'
+VERSION = '1.1.1'
 AUTHOR = 'Zenoss'
 LICENSE = ''
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = []
 INSTALL_REQUIRES = ['ZenPacks.zenoss.PySamba']
-COMPAT_ZENOSS_VERS = '>=4.1.70'
+COMPAT_ZENOSS_VERS = '>=4.2.4'
 PREV_ZENPACK_NAME = 'ZenPacks.zenoss.WindowsMonitor'
 
 # STOP_REPLACEMENTS

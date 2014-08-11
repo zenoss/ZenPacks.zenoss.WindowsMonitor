@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:reference" "reference.dtd">
+<reference id="d71e1152">
+  <title>Tuning Collector Daemon Performance</title>
+  <refbody>
+    <section><p>WindowsMonitor creates several configuration properties that control its
+    behavior. Values for the configuration properties are initially set on the
+    <keyword outputclass="classname">/Devices</keyword> device class. As with any property, these
+    values can be overridden in other device classes and on individual devices
+    themselves.</p>
+      <table>
+      <title>zenwinperf Daemon Configuration Properties</title>
+      <tgroup cols="2">
+        <thead>
+          <row>
+            <entry>Property</entry>
+            <entry>Setting</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><p>zWinPerfCycleSeconds</p></entry>
+            <entry><p>This is how frequently (in seconds)
+            <cmdname>zewinperf</cmdname> data sources are collected. By
+            default this is set to 300 seconds.</p></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table></section></refbody></reference>

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:task" "task.dtd">
+<task id="d71e688"><title>Configuring a Standalone Windows Device for a Non-Administrative
+    Account</title><taskbody><context><p>Monitoring Windows devices normally requires an account with
+    administrator-level privileges. For the <ph conkeyref="names/platform"/> user who wants to use a non-administrative
+    account, several additional configuration steps must be performed on each
+    Windows device, or by using a Group Policy.</p><p><ph conkeyref="names/platform"/> uses the Windows Management Instrumentation
+    (WMI) feature to collect modeling information. The remote Windows registry
+    API also is used to collect low-level performance monitor ("PerfMon")
+    statistics. Both of these Windows sub-systems use the Microsoft Remote
+    Procedure Call (MS-RPC) interface to connect to the Windows device and
+    gather the appropriate information. MS-RPC handles the authentication on a
+    per-packet or per-session basis, but ultimately the access granted is
+    determined by the sub-systems involved with serving the remote procedure
+    calls.</p></context><steps-informal><ol>
+      <li>
+        <p>If the Windows firewall is in use, modify it to allow Remote
+        Administration access. This will open the MS-RPC port and others as
+        needed. Enter the following command at the command prompt:</p>
+
+        <codeblock outputclass="screen">netsh firewall set service RemoteAdmin enable</codeblock>
+      </li>
+
+      <li>
+        <p>On Windows XP, Simple File Sharing must be disabled for machines
+        that are not located within a Domain. When this feature is enabled it
+        causes all incoming MS-RPC connections to use the built-in Guest
+        account, rather than the account credentials specified in the incoming
+        call. This option may be found by going to <uicontrol outputclass="guilabel">Control
+        Panel</uicontrol>, opening the Folder Options applet and then choosing
+        the <uicontrol outputclass="guilabel">View</uicontrol> tab. In the <uicontrol outputclass="guilabel">Advanced
+        Settings</uicontrol> list, locate the <uicontrol outputclass="guilabel">Use simple file sharing
+        (Recommended)</uicontrol> option, and then disable it.</p>
+
+        <fig>
+          <title>Windows XP Disable Simple File Sharing</title>
+
+          <p outputclass="mediaobject">
+            <image href="../images/winXP-disable-simple-file-sharing.png" width="4in" scalefit="yes"/>
+          </p>
+        </fig>
+      </li>
+
+      <li>
+        <p>Create a local account on the Windows device for monitoring. We
+        assume in the remainder of these steps that this account was named
+        <codeph outputclass="literal">zenossmon</codeph> but any valid account name can be used.
+        Place the account only in the Users group and not in the Power Users
+        or Administrators groups. Optionally, create a new user group for
+        monitoring and use that group instead of the account in the remaining
+        steps.</p>
+      </li>
+
+      <li>
+        <p>Give the <codeph outputclass="literal">zenossmon</codeph> account DCOM access by
+        running the <xref href="http://msdn.microsoft.com/en-us/library/aa393266.aspx" scope="external" format="html"><cmdname>dcomcnfg</cmdname>
+        utility</xref>.</p>
+
+        <fig>
+          <title>Component Services COM Security Settings</title>
+
+          <p outputclass="mediaobject">
+            <image href="../images/component-services-com-security.png" width="4in" scalefit="yes"/>
+          </p>
+        </fig>
+
+        <ol>
+          <li>
+            <p>In the <uicontrol outputclass="guilabel">Component Services</uicontrol> dialog box,
+            expand <uicontrol outputclass="guilabel">Component Services</uicontrol>, expand
+            <uicontrol outputclass="guilabel">Computers</uicontrol>, and then right-click <uicontrol outputclass="guilabel">My
+            Computer</uicontrol> and click <uicontrol outputclass="guilabel">Properties</uicontrol>
+            .</p>
+          </li>
+
+          <li>
+            <p>In the <uicontrol outputclass="guilabel">My Computer Properties</uicontrol> dialog
+            box, click the <uicontrol outputclass="guilabel">COM Security</uicontrol> tab.</p>
+          </li>
+
+          <li>
+            <p>Under <uicontrol outputclass="guilabel">Access Permissions</uicontrol>, click
+            <uicontrol outputclass="guilabel">Edit Limits</uicontrol>. In the <uicontrol outputclass="guilabel">Access
+            Permission</uicontrol> dialog box, add the
+            <codeph outputclass="literal">zenossmon</codeph> account to the list and ensure that
+            the <uicontrol outputclass="guilabel">Remote Access</uicontrol> checkbox is enabled, then
+            click <uicontrol outputclass="guibutton">OK</uicontrol> to close the dialog.</p>
+          </li>
+
+          <li>
+            <p>Under <uicontrol outputclass="guilabel">Launch and Activation
+            Permissions</uicontrol>, click <uicontrol outputclass="guilabel">Edit Limits</uicontrol>. In
+            the <uicontrol outputclass="guilabel">Access Permission</uicontrol> dialog box, add the
+            <codeph outputclass="literal">zenossmon</codeph> account to the list and ensure that
+            the <uicontrol outputclass="guilabel">Remote Launch</uicontrol> and <uicontrol outputclass="guilabel">Remote
+            Activation</uicontrol> checkboxes are enabled, then click
+            <uicontrol outputclass="guibutton">OK</uicontrol> to close the dialog.</p>
+          </li>
+
+          <li>
+            <p>Click <uicontrol outputclass="guibutton">OK</uicontrol> on the <uicontrol outputclass="guilabel">My Computer
+            Properties</uicontrol> dialog to save all changes.</p>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <p>Give the <codeph outputclass="literal">zenossmon</codeph> account permissions to
+        read the WMI namespace by using <xref href="http://technet.microsoft.com/en-us/library/cc787533.aspx" scope="external" format="html"><uicontrol outputclass="guilabel">WMI
+        Control</uicontrol></xref>.</p>
+
+        <fig>
+          <title>WMI Control Properties</title>
+
+          <p outputclass="mediaobject">
+            <image href="../images/wmi-control-properties.png" width="4in" scalefit="yes"/>
+          </p>
+        </fig>
+
+        <ol>
+          <li>
+            <p>Open the <menucascade><uicontrol outputclass="guimenu">Start</uicontrol></menucascade> menu and right-click on
+            <uicontrol outputclass="guilabel">My Computer</uicontrol>. Select
+            <menucascade><uicontrol outputclass="guimenuitem">Manage</uicontrol></menucascade> from the menu.</p>
+          </li>
+
+          <li>
+            <p>In the <uicontrol outputclass="guilabel">Computer Management</uicontrol> dialog,
+            expand the <uicontrol outputclass="guilabel">Services and Applications</uicontrol> item and
+            then right-click on <uicontrol outputclass="guilabel">WMI Control</uicontrol>.</p>
+          </li>
+
+          <li>
+            <p>In the <uicontrol outputclass="guilabel">WMI Control Properties</uicontrol> dialog,
+            click the <uicontrol outputclass="guilabel">Security</uicontrol> tab.</p>
+          </li>
+
+          <li>
+            <p>Expand the <uicontrol outputclass="guilabel">Root</uicontrol> namespace, select the
+            <uicontrol outputclass="guilabel">CIMV2</uicontrol> namespace folder and then click
+            <uicontrol outputclass="guilabel">Security</uicontrol>.</p>
+          </li>
+
+          <li>
+            <p>In the <uicontrol outputclass="guilabel">Security for ROOT\CIMV2</uicontrol> dialog,
+            add the <codeph outputclass="literal">zenossmon</codeph> user to the list and ensure
+            the <uicontrol outputclass="guilabel">Enable Account</uicontrol> and <uicontrol outputclass="guilabel">Remote
+            Enable</uicontrol> checkboxes are enabled, then click
+            <uicontrol outputclass="guibutton">OK</uicontrol> to close the dialog.</p>
+          </li>
+
+          <li>
+            <p>In the <uicontrol outputclass="guilabel">WMI Control Properties</uicontrol> dialog
+            click <uicontrol outputclass="guibutton">OK</uicontrol> to close the dialog and save all
+            changes.</p>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <p>At this point in the process remote access to WMI should be
+        enabled and functioning. Test it by running the following command from
+        the <ph conkeyref="names/platform"/> server:</p>
+
+        <codeblock outputclass="screen">wmic -U '.\zenossmon' //<varname outputclass="replaceable">myhostname</varname> 'SELECT Name FROM Win32_ComputerSystem'</codeblock>
+
+        <p>If all is well this command should return the remote system name
+        as the response. If there is any error, carefully recheck the above
+        steps to ensure all access has been properly granted.</p>
+      </li>
+
+      <li>
+        <p>To gather Windows performance data from PerfMon permissions on
+        the <codeph outputclass="literal">winreg</codeph> registry key must be granted to our
+        monitoring user by using <xref href="http://support.microsoft.com/default.aspx?scid=kb;en-us;164018" scope="external" format="html"><cmdname>regedit</cmdname></xref>.</p>
+
+        <fig>
+          <title>regedit and the winreg Key</title>
+
+          <p outputclass="mediaobject">
+            <image href="../images/regedit-and-winreg.png" width="4in" scalefit="yes"/>
+          </p>
+        </fig>
+
+        <ol>
+          <li>
+            <p>Run <cmdname>regedit</cmdname>.</p>
+          </li>
+
+          <li>
+            <p>Browse to the
+            <filepath>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurePipeServers\winreg</filepath>
+            key.</p>
+          </li>
+
+          <li>
+            <p>Right-click on the <codeph outputclass="literal">winreg</codeph> key and choose
+            <uicontrol outputclass="guilabel">Permissions</uicontrol>.</p>
+          </li>
+
+          <li>
+            <p>Add the monitoring user to the permissions list and grant
+            only <codeph outputclass="literal">Read</codeph> permissions</p>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <p>Give the <codeph outputclass="literal">zenossmon</codeph> account <xref href="http://support.microsoft.com/kb/323076" scope="external" format="html">access to read the
+        Windows Event Log</xref>.</p>
+
+        <p>Once the appropriate changes are made, test that Event Log
+        access works with your <codeph outputclass="literal">zenossmon</codeph> user. Run the
+        following from your <ph conkeyref="names/platform"/> system:</p>
+
+        <codeblock outputclass="screen">wmic -U '.\zenossmon' //<varname outputclass="replaceable">myhostname</varname> \
+'SELECT Message FROM Win32_NTLogEvent WHERE LogFile="Application"'</codeblock>
+      </li>
+
+      <li>
+        <p>If you are using SP1 or newer with Windows Server 2003, then you
+        must <xref href="http://support.microsoft.com/kb/907460" scope="external" format="html">allow
+        non-administrative users to access the service control manager</xref>
+        to monitor services.</p>
+
+        <p>At a command prompt, run the following:</p>
+
+        <codeblock outputclass="screen">sc sdset SCMANAGER
+D:(A;;CCLCRPRC;;;AU)(A;;CCLCRPWPRC;;;SY)(A;;KA;;;BA)S:(AU;FA;KA;;;WD)
+(AU;OIIOFA;GA;;;WD)</codeblock>
+
+        <note type="warning">
+          <p>The above command should be one line.</p>
+        </note>
+
+        <p>At this point you should be able to query Windows service status
+        remotely by using the non-administrative account. Test this by running
+        the following command from your <ph conkeyref="names/platform"/> system:</p>
+
+        <codeblock outputclass="screen">wmic -U '.\zenossmon' //<varname outputclass="replaceable">myhostname</varname> 'SELECT Name FROM Win32_Service'</codeblock>
+      </li>
+    </ol></steps-informal></taskbody></task>

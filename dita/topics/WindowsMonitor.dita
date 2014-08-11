@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:reference" "reference.dtd">
+<reference id="d71e6">
+  <title>WindowsMonitor (Microsoft Windows)</title>
+  <shortdesc>The <zenpack>ZenPacks.zenoss.WindowsMonitor</zenpack> ZenPack uses WMI to monitor the performance of Microsoft Windows servers.</shortdesc>
+  <refbody>
+  <section>
+    <note>This ZenPack is deprecated; see <xref keyref="reference-ZenPacks.zenoss.Microsoft.Windows"/>.</note>
+  <p>The <filepath>WinPerf</filepath> data source uses a Windows performance counter (rather than an
+        SNMP OID) to specify the value to collect. For more information on Windows Management
+        Instrumentation (WMI), please see this <xref
+          href="http://technet.microsoft.com/en-us/library/bb742445.aspx" scope="external"
+          format="html">Microsoft Technet Article</xref>.</p>
+	
+	<table>
+      <title>Windows Monitoring Daemons</title>
+      <tgroup cols="2">
+        <colspec colname="c1" colwidth="1*"/>
+        <colspec colname="c2" colwidth="4*"/>
+        <thead>
+          <row>
+            <entry>Name</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><p><cmdname>zenwin</cmdname></p></entry>
+            <entry><p>Watches Windows services and reports on
+            status.</p></entry>
+          </row>
+          <row>
+            <entry><p><cmdname>zeneventlog</cmdname></p></entry>
+            <entry><p>Watches the Windows event log and generates
+            events.</p></entry>
+          </row>
+          <row>
+            <entry><p><cmdname>zenwinperf</cmdname></p></entry>
+            <entry><p>Collects performance data.</p></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table></section></refbody></reference>
