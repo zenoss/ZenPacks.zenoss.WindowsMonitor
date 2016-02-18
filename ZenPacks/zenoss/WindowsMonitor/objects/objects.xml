@@ -2,6 +2,9 @@
 <objects>
 <!-- ('', 'zport', 'dmd', 'Devices', 'Server', 'Windows', 'WMI') -->
 <object id='/zport/dmd/Devices/Server/Windows/WMI' module='Products.ZenModel.DeviceClass' class='DeviceClass'>
+<property visible="True" type="boolean" id="zWmiMonitorIgnore" >
+False
+</property>
 <property visible="True" type="lines" id="devtypes">
 [('Windows Server', 'WMI')]
 </property>
